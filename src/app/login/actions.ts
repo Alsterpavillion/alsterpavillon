@@ -1,8 +1,8 @@
 "use server";
 
+import { headers } from "next/headers";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { publicEnv } from "@/lib/env/public";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -22,7 +22,12 @@ export async function requestMagicLink(formData: FormData): Promise<LoginResult>
   }
 
   const supabase = await createSupabaseServerClient();
-  const callback = new URL("/auth/callback", publicEnv.NEXT_PUBLIC_APP_URL);
+  const requestHeaders = await headers();
+  const proto = requestHeaders.get("x-forwarded-proto") ?? "https";
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const origin = host ? `${proto}://${host}` : process.env.NEXT_PUBLIC_APP_URL;
+  // PKCE requires the callback origin to match the login origin because the verifier cookie is domain-scoped.
+  const callback = new URL("/auth/callback", origin);
   if (parsed.data.next) callback.searchParams.set("next", parsed.data.next);
 
   const { error } = await supabase.auth.signInWithOtp({
