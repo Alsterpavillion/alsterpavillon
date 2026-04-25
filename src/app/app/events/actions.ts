@@ -21,6 +21,8 @@ export async function createEventForm(formData: FormData) {
     start_time: strField(formData, "start_time"),
     end_time: strField(formData, "end_time"),
     room_id: strField(formData, "room_id"),
+    company_id: strField(formData, "company_id"),
+    contact_id: strField(formData, "contact_id"),
   };
   await createEvent(input);
   redirect("/app/events");
@@ -32,6 +34,8 @@ export async function updateEventForm(id: string, formData: FormData) {
     start_time: strField(formData, "start_time"),
     end_time: strField(formData, "end_time"),
     status: strField(formData, "status") as EventStatus,
+    company_id: strField(formData, "company_id"),
+    contact_id: strField(formData, "contact_id"),
   };
   await updateEvent(id, patch);
   redirect(`/app/events/${id}`);

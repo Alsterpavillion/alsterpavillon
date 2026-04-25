@@ -430,3 +430,108 @@ describe("server action — RLS / auth gate", () => {
     expect(result.title).toBe("Auth Path");
   });
 });
+
+describe("createEventRecord — full reference integration", () => {
+  it("succeeds with all three references (company + contact + room) valid", async () => {
+    const companyExists = makeQuery({ data: { id: COMPANY_ID }, error: null });
+    const contactExists = makeQuery({ data: { id: CONTACT_ID }, error: null });
+    const roomExists = makeQuery({ data: { id: ROOM_ID }, error: null });
+    const inserted = makeEvent({
+      company_id: COMPANY_ID,
+      contact_id: CONTACT_ID,
+      room_id: ROOM_ID,
+      title: "Wedding",
+    });
+    const insertQuery = makeQuery({ data: inserted, error: null });
+    const { client, rpc } = makeSupabase({
+      chains: [companyExists, contactExists, roomExists, insertQuery],
+    });
+
+    const result = await createEventRecord(client, USER_ID, {
+      title: "Wedding",
+      company_id: COMPANY_ID,
+      contact_id: CONTACT_ID,
+      room_id: ROOM_ID,
+    });
+
+    expect(result.company_id).toBe(COMPANY_ID);
+    expect(result.contact_id).toBe(CONTACT_ID);
+    expect(result.room_id).toBe(ROOM_ID);
+    expect(insertQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Wedding",
+        company_id: COMPANY_ID,
+        contact_id: CONTACT_ID,
+        room_id: ROOM_ID,
+        created_by: USER_ID,
+        event_number: "EV-2026-0001",
+      }),
+    );
+    expect(rpc.mock.calls.filter(([n]) => n === "next_event_number")).toHaveLength(1);
+    expect(rpc.mock.calls.filter(([n]) => n === "log_audit")).toHaveLength(1);
+  });
+});
+
+describe("updateEventRecord — reference changes", () => {
+  it("succeeds when changing company_id to another existing company", async () => {
+    const companyExists = makeQuery({ data: { id: COMPANY_ID }, error: null });
+    const before = makeEvent({ company_id: "55555555-5555-4555-8555-555555555555" });
+    const after = makeEvent({ company_id: COMPANY_ID });
+    const beforeQuery = makeQuery({ data: before, error: null });
+    const updateQuery = makeQuery({ data: after, error: null });
+    const { client, rpc } = makeSupabase({
+      chains: [companyExists, beforeQuery, updateQuery],
+    });
+
+    const result = await updateEventRecord(client, EVENT_ID, { company_id: COMPANY_ID });
+
+    expect(result.company_id).toBe(COMPANY_ID);
+    expect(updateQuery.update).toHaveBeenCalledWith({ company_id: COMPANY_ID });
+
+    const auditCalls = rpc.mock.calls.filter(([n]) => n === "log_audit");
+    expect(auditCalls).toHaveLength(1);
+    expect(auditCalls[0]?.[1]).toMatchObject({
+      p_entity_type: "event",
+      p_entity_id: EVENT_ID,
+      p_action: "event_updated",
+      p_before: before,
+      p_after: after,
+    });
+  });
+
+  it("succeeds when changing contact_id to another existing contact", async () => {
+    const contactExists = makeQuery({ data: { id: CONTACT_ID }, error: null });
+    const before = makeEvent({ contact_id: "66666666-6666-4666-8666-666666666666" });
+    const after = makeEvent({ contact_id: CONTACT_ID });
+    const beforeQuery = makeQuery({ data: before, error: null });
+    const updateQuery = makeQuery({ data: after, error: null });
+    const { client } = makeSupabase({
+      chains: [contactExists, beforeQuery, updateQuery],
+    });
+
+    const result = await updateEventRecord(client, EVENT_ID, { contact_id: CONTACT_ID });
+
+    expect(result.contact_id).toBe(CONTACT_ID);
+    expect(updateQuery.update).toHaveBeenCalledWith({ contact_id: CONTACT_ID });
+  });
+
+  it("succeeds when clearing company_id and contact_id (set to null)", async () => {
+    const before = makeEvent({ company_id: COMPANY_ID, contact_id: CONTACT_ID });
+    const after = makeEvent({ company_id: null, contact_id: null });
+    const beforeQuery = makeQuery({ data: before, error: null });
+    const updateQuery = makeQuery({ data: after, error: null });
+    const { client } = makeSupabase({ chains: [beforeQuery, updateQuery] });
+
+    const result = await updateEventRecord(client, EVENT_ID, {
+      company_id: null,
+      contact_id: null,
+    });
+
+    expect(result.company_id).toBeNull();
+    expect(result.contact_id).toBeNull();
+    expect(updateQuery.update).toHaveBeenCalledWith({
+      company_id: null,
+      contact_id: null,
+    });
+  });
+});
