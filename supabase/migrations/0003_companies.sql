@@ -18,7 +18,7 @@ create table public.companies (
   vat_id text,
   billing_address text,
   notes text,
-  created_by uuid references auth.users(id) on delete set null default (select auth.uid()),
+  created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint companies_name_not_empty check (length(trim(name)) > 0)
