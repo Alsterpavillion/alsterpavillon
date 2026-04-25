@@ -10,6 +10,10 @@ export async function createSupabaseServerClient() {
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
     publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
+      auth: {
+        flowType: "pkce",
+        detectSessionInUrl: false,
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();
