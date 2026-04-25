@@ -88,6 +88,29 @@ supabase db push
 - Rate-Limit-Modul ist fail-closed Stub — wirft, bis echtes Backend (Upstash/Redis) angeschlossen ist.
 - ENV-Validation ist Pflicht beim Boot (Zod, fail-closed).
 
+## Known operational risks
+
+### Branch-Protection auf `main` ist serverseitig **NICHT** aktiv
+
+**Ursache:** Org `Alsterpavillion` läuft auf **GitHub Free**. GitHub Free schaltet Branch-Protection-Rules und Repository-Rulesets für **private** Org-Repos nicht frei. Aktivierung erfordert entweder einen kostenpflichtigen Plan (GitHub Team / Pro) oder das Repo public zu schalten — beides aktuell explizit nicht gewünscht. Sowohl Legacy-Branch-Protection-API als auch die neuere Rulesets-API antworten mit `HTTP 403: "Upgrade to GitHub Pro or make this repository public to enable this feature."`
+
+**Konsequenz:** technisch sind aktuell möglich:
+
+- Force-Pushes auf `main`
+- Löschen von `main`
+- Direct-Commit-on-Main ohne PR
+- Merge bei rotem CI-Run
+
+Es gibt keine serverseitige Erzwingung. Mitigation erfolgt **prozessual** durch Disziplin der Maintainer.
+
+### Verbindliche Prozessregeln (bis Branch-Protection aktiv ist)
+
+1. **Kein Merge in `main` ohne grünen CI-Run.** Wenn CI rot ist, gilt der Branch als nicht mergebar — auch wenn er technisch mergebar wäre. Diese Regel gilt insbesondere für den Übergang zu **M1 und alle weiteren Milestones**: kein Sprint-Start solange der letzte Run auf `main` rot ist.
+2. **Keine Force-Pushes auf `main`.** Bei Konflikten: regulärer Merge / Rebase mit linearer History, vorher Kommunikation. `git push --force` und `git push --force-with-lease` auf `main` sind tabu.
+3. **Keine `main`-Branch-Deletion.** Nicht aus Versehen, nicht zur "Bereinigung".
+4. **Keine direkten riskanten Änderungen ohne Statusbericht.** Riskant zählt: ENV/Secrets, DB-Migrations (insbesondere RLS / Grants / Audit-Log-Schema), CI-Workflow-Änderungen, Auth-Logik, Storage-Policies, Rate-Limit-Backend, jede Mutation kritischer Domains (Auth/Booking/Payment/Data/Matching). Jede solche Änderung erhält Statusbericht (geänderte Dateien, Tests, Typecheck, Lint, offene Risiken) bevor sie auf `main` landet.
+5. **Re-Eval bei Plan-Upgrade.** Sobald ein bezahlter GitHub-Plan aktiviert ist (oder das Repo bewusst public geschaltet wird), Branch-Protection-Rules sofort nachholen: required CI-Checks (`Typecheck / Lint / Format / Test` + `Dependency audit / Secret scan`), `strict_required_status_checks_policy=true`, `non_fast_forward` blockieren, `deletion` blockieren.
+
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`):
