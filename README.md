@@ -118,22 +118,20 @@ GitHub Actions (`.github/workflows/ci.yml`):
 - Typecheck, Lint, Format-Check, Vitest
 - ENV-Validation Smoke
 - `pnpm audit --audit-level=critical`
-- Gitleaks Secret-Scan auf Diff
+- TruffleHog Secret-Scan (`--results=verified,unknown`)
 
 Alle Jobs blockierend.
 
 ## Nächste Schritte (post-M0)
 
-Vor M1 sind folgende User-Aktionen nötig (Claude kann diese nicht durchführen):
+Vor M1 sind folgende Schritte nötig. Status pro Schritt:
 
-1. GitHub-Repo erstellen + `git remote add origin` + initial push (`gh repo create alsterpavillon --private`).
-2. Supabase-Projekt anlegen (eu-central-1 / Frankfurt für DSGVO), Auth → Email aktivieren, Magic Link konfigurieren.
-3. ENV-Werte in Vercel + lokal eintragen.
-4. `supabase link --project-ref <ref>` + `supabase db push`.
-5. Vercel-Projekt verbinden, ENV synchronisieren, Production-Domain wählen.
-6. Branch-Protection auf `main`: CI required, 1 Reviewer, no force-push.
+1. ✅ **erledigt** — GitHub-Repo `Alsterpavillion/alsterpavillon` (private, Org `Alsterpavillion`), `origin` lokal gesetzt, initial Push abgeschlossen, CI grün auf `main`.
+2. ⏭ **nächster aktiver Schritt** — Supabase-Projekt anlegen (eu-central-1 / Frankfurt für DSGVO), Auth → Email aktivieren, Magic Link konfigurieren, anschließend `supabase link --project-ref <ref>` + `supabase db push` (Migrations `0001_profiles_rls_baseline.sql` + `0002_audit_log.sql`), ENV-Werte (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) in `.env.local` eintragen + via `pnpm env:check` validieren.
+3. ⏳ Vercel-Projekt verbinden, ENV synchronisieren, Production-Domain wählen.
+4. 🚫 **blockiert** — Branch-Protection auf `main` (CI required, no force-push, no deletion). GitHub Free schaltet Branch-Protection / Rulesets für private Org-Repos nicht frei. Details + Prozessregeln als Mitigation siehe Sektion [Known operational risks](#known-operational-risks). Re-Eval, sobald GitHub-Plan upgegradet ist.
 
-Erst dann ist M0-DoD vollständig erfüllt; M1 (CRM Core) kann starten.
+Erst nach Abschluss von 2 + 3 ist M0-DoD vollständig erfüllt; M1 (CRM Core) kann starten.
 
 ## Kontext
 
