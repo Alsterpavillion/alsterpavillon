@@ -31,6 +31,12 @@ export async function requestMagicLink(formData: FormData): Promise<LoginResult>
   });
 
   if (error) {
+    console.error("[auth/login] signInWithOtp failed", {
+      message: error.message,
+      status: error.status,
+      email: parsed.data.email,
+    });
+
     return { ok: false, error: "Login fehlgeschlagen. Bitte erneut versuchen." };
   }
 
