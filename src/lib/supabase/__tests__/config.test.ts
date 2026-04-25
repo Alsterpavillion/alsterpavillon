@@ -20,8 +20,8 @@ describe("Supabase auth flow config", () => {
     await createSupabaseServerClient();
 
     expect(createServerClient).toHaveBeenCalledWith(
-      "https://test.supabase.co",
-      "test-anon-key",
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       expect.objectContaining({
         auth: {
           flowType: "pkce",
@@ -38,10 +38,14 @@ describe("Supabase auth flow config", () => {
     const { createSupabaseBrowserClient } = await import("../client");
     createSupabaseBrowserClient();
 
-    expect(createBrowserClient).toHaveBeenCalledWith("https://test.supabase.co", "test-anon-key", {
-      auth: {
-        flowType: "pkce",
+    expect(createBrowserClient).toHaveBeenCalledWith(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        auth: {
+          flowType: "pkce",
+        },
       },
-    });
+    );
   });
 });
