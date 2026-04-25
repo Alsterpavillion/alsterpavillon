@@ -124,6 +124,21 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
           </select>
         </label>
         <label className="block text-sm">
+          <span className="mb-1 block text-zinc-700">Room</span>
+          <select
+            name="room_id"
+            defaultValue={event.room_id ?? ""}
+            className="w-full rounded border border-zinc-300 px-3 py-2 outline-none focus:border-zinc-900"
+          >
+            <option value="">— none —</option>
+            {rooms.map((room) => (
+              <option key={room.id} value={room.id}>
+                {room.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm">
           <span className="mb-1 block text-zinc-700">Company</span>
           <select
             name="company_id"
