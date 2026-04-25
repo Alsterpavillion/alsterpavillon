@@ -11,7 +11,10 @@ export default function NewCompanyPage() {
         <h1 className="mt-3 text-2xl font-semibold text-zinc-900">New company</h1>
       </div>
 
-      <form action={createCompany} className="space-y-4 rounded border border-zinc-200 bg-white p-5">
+      <form
+        action={createCompany}
+        className="space-y-4 rounded border border-zinc-200 bg-white p-5"
+      >
         <label className="block text-sm">
           <span className="mb-1 block text-zinc-700">Name</span>
           <input

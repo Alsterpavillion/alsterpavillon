@@ -39,21 +39,26 @@ export default async function ContactsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200">
-            {(contacts as
-              | Pick<
-                  Contact,
-                  | "id"
-                  | "first_name"
-                  | "last_name"
-                  | "email"
-                  | "phone"
-                  | "is_private_customer"
-                  | "updated_at"
-                >[]
-              | null)?.map((contact) => (
+            {(
+              contacts as
+                | Pick<
+                    Contact,
+                    | "id"
+                    | "first_name"
+                    | "last_name"
+                    | "email"
+                    | "phone"
+                    | "is_private_customer"
+                    | "updated_at"
+                  >[]
+                | null
+            )?.map((contact) => (
               <tr key={contact.id}>
                 <td className="px-4 py-3">
-                  <Link className="font-medium text-zinc-900 hover:underline" href={`/app/contacts/${contact.id}`}>
+                  <Link
+                    className="font-medium text-zinc-900 hover:underline"
+                    href={`/app/contacts/${contact.id}`}
+                  >
                     {contact.first_name} {contact.last_name}
                   </Link>
                 </td>

@@ -22,7 +22,10 @@ export default async function NewContactPage() {
         <h1 className="mt-3 text-2xl font-semibold text-zinc-900">New contact</h1>
       </div>
 
-      <form action={createContact} className="space-y-4 rounded border border-zinc-200 bg-white p-5">
+      <form
+        action={createContact}
+        className="space-y-4 rounded border border-zinc-200 bg-white p-5"
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block text-sm">
             <span className="mb-1 block text-zinc-700">First name</span>
@@ -77,7 +80,11 @@ export default async function NewContactPage() {
           </label>
         </div>
         <label className="flex items-center gap-2 text-sm text-zinc-700">
-          <input name="is_private_customer" type="checkbox" className="h-4 w-4 rounded border-zinc-300" />
+          <input
+            name="is_private_customer"
+            type="checkbox"
+            className="h-4 w-4 rounded border-zinc-300"
+          />
           Private customer
         </label>
         <label className="block text-sm">

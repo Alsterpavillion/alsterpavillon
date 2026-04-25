@@ -6,7 +6,11 @@ import { deleteCompany, updateCompany, type Company } from "@/lib/crm/actions";
 export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
-  const { data: company, error } = await supabase.from("companies").select("*").eq("id", id).single();
+  const { data: company, error } = await supabase
+    .from("companies")
+    .select("*")
+    .eq("id", id)
+    .single();
 
   if (error || !company) {
     notFound();

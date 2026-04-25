@@ -42,7 +42,10 @@ export default async function CompaniesPage() {
               (company) => (
                 <tr key={company.id}>
                   <td className="px-4 py-3">
-                    <Link className="font-medium text-zinc-900 hover:underline" href={`/app/companies/${company.id}`}>
+                    <Link
+                      className="font-medium text-zinc-900 hover:underline"
+                      href={`/app/companies/${company.id}`}
+                    >
                       {company.name}
                     </Link>
                   </td>
